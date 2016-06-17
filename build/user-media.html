@@ -1,0 +1,155 @@
+<!--
+@license
+Copyright (c) 2016 herr.kaste <herr.kaste@gmail.com>. All rights reserved.
+This code may only be used under the BSD style license.
+-->
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../Pony/Pony.decorators.html">
+
+<script>(function (Pony_decorators) {
+  'use strict';
+
+  // min :: [Number a] -> a
+  const min = Function.prototype.apply.bind(Math.min, null);
+  // max :: [Number a] -> a
+  const max = Function.prototype.apply.bind(Math.max, null);
+
+  const getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia).bind(navigator);
+
+  function openStream(options) {
+    return new Promise((resolve, reject) => {
+      getUserMedia(options, resolve, reject);
+    });
+    // .catch((e) => {
+    //   console.log('openStream errored', e)
+    // })
+  }
+
+  function closeStream(stream) {
+    for (let track of stream.getTracks()) {
+      track.stop();
+    }
+  }
+
+  var _dec;
+  var _dec2;
+  var _dec3;
+  var _dec4;
+  var _obj;
+  var _init;
+  var _init2;
+  var _init3;
+  var _init4;
+  var _init5;
+  function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+    var desc = {};
+    Object['ke' + 'ys'](descriptor).forEach(function (key) {
+      desc[key] = descriptor[key];
+    });
+    desc.enumerable = !!desc.enumerable;
+    desc.configurable = !!desc.configurable;
+
+    if ('value' in desc || desc.initializer) {
+      desc.writable = true;
+    }
+
+    desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+      return decorator(target, property, desc) || desc;
+    }, desc);
+
+    if (context && desc.initializer !== void 0) {
+      desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+      desc.initializer = undefined;
+    }
+
+    if (desc.initializer === void 0) {
+      Object['define' + 'Property'](target, property, desc);
+      desc = null;
+    }
+
+    return desc;
+  }
+
+  Polymer((_dec = Pony_decorators.property({ readOnly: Pony_decorators.readOnly, notify: Pony_decorators.notify }), _dec2 = Pony_decorators.property({ readOnly: Pony_decorators.readOnly, notify: Pony_decorators.notify }), _dec3 = Pony_decorators.asyncObserver('(open, audio, video)'), _dec4 = Pony_decorators.FX('open'), (_obj = {
+    is: 'user-media',
+
+    open: Boolean,
+
+    audio: false,
+
+    video: false,
+
+    stream: Object,
+
+    error: Object,
+
+    _openChanged(open, audio, video) {
+      if (open) {
+        this.openStream({ audio, video });
+      } else {
+        this.closeStream();
+      }
+    },
+
+    openStream(options = { video: this.video || false,
+      audio: this.audio || false }) {
+      if (this.stream) this.closeStream();
+
+      let then = Date.now();
+      return openStream(options).then(stream => {
+        this.guard('open', _ => this.open = true);
+        this._setStream(stream);
+      }).catch(error => {
+        let now = Date.now();
+        if (now - then < 1000) {
+          this.fire('auto-denied');
+        }
+        this._setError(error);
+        this.guard('open', _ => this.open = false);
+      });
+    },
+
+    closeStream(stream = this.stream) {
+      if (stream) closeStream(stream);
+      this._setStream(null);
+      this.guard('open', _ => this.open = false);
+    }
+
+  }, (_applyDecoratedDescriptor(_obj, 'open', [Pony_decorators.attribute], (_init = Object.getOwnPropertyDescriptor(_obj, 'open'), _init = _init ? _init.value : undefined, {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    initializer: function () {
+      return _init;
+    }
+  }), _obj), _applyDecoratedDescriptor(_obj, 'audio', [Pony_decorators.attribute], (_init2 = Object.getOwnPropertyDescriptor(_obj, 'audio'), _init2 = _init2 ? _init2.value : undefined, {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    initializer: function () {
+      return _init2;
+    }
+  }), _obj), _applyDecoratedDescriptor(_obj, 'video', [Pony_decorators.attribute], (_init3 = Object.getOwnPropertyDescriptor(_obj, 'video'), _init3 = _init3 ? _init3.value : undefined, {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    initializer: function () {
+      return _init3;
+    }
+  }), _obj), _applyDecoratedDescriptor(_obj, 'stream', [_dec], (_init4 = Object.getOwnPropertyDescriptor(_obj, 'stream'), _init4 = _init4 ? _init4.value : undefined, {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    initializer: function () {
+      return _init4;
+    }
+  }), _obj), _applyDecoratedDescriptor(_obj, 'error', [_dec2], (_init5 = Object.getOwnPropertyDescriptor(_obj, 'error'), _init5 = _init5 ? _init5.value : undefined, {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    initializer: function () {
+      return _init5;
+    }
+  }), _obj), _applyDecoratedDescriptor(_obj, '_openChanged', [_dec3, _dec4], Object.getOwnPropertyDescriptor(_obj, '_openChanged'), _obj)), _obj)));
+
+}(Pony.decorators));</script>

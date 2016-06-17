@@ -1,0 +1,53 @@
+<!--
+@license
+Copyright (c) 2016 herr.kaste <herr.kaste@gmail.com>. All rights reserved.
+This code may only be used under the BSD style license.
+-->
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../Pony/Pony.decorators.html">
+
+
+<script>
+  import {play_sample, sample_player, AudioBufferFromArrayBuffer} from './AudioLegoLib'
+
+  import {attribute, property, computed, observer,
+          notify, ensureAll, nonVisual} from 'Pony.decorators'
+
+  Polymer({
+    @nonVisual
+    is: 'play-sample',
+
+    @property
+    ctx: () => new AudioContext,
+
+    @property
+    data: Array,  // type: [Float32Array]
+
+    @attribute
+    play: Boolean,
+
+
+    @computed('(ctx, data)') // type: AudioBuffer?
+    @ensureAll(Boolean, {otherwise: null})
+    __sample: AudioBufferFromArrayBuffer,
+
+
+    @computed('(ctx, __sample, play)')
+    @ensureAll(Boolean, {otherwise: null})
+    __player:
+      (ctx, sample, _play) => sample_player(ctx, sample),
+
+
+    @observer('__player')
+    _onSamplerChanged(current, previous) {
+      if (previous)
+        previous.stop()
+
+      if (current)
+        current.start().then(() => this.play = false)
+    }
+
+
+  })
+
+</script>

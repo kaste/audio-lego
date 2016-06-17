@@ -1,0 +1,215 @@
+<!--
+@license
+Copyright (c) 2016 herr.kaste <herr.kaste@gmail.com>. All rights reserved.
+This code may only be used under the BSD style license.
+-->
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../Pony/Pony.decorators.html">
+
+
+<script>(function (Pony_decorators) {
+  'use strict';
+
+  // min :: [Number a] -> a
+  const min = Function.prototype.apply.bind(Math.min, null);
+  // max :: [Number a] -> a
+  const max = Function.prototype.apply.bind(Math.max, null);
+
+  // dropUntil :: (a -> Boolean) -> [a] -> [a]
+  const dropUntil = fn => ary => ary.slice(ary.findIndex(fn));
+
+  const getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia).bind(navigator);
+
+  function _connect(objects, method) {
+    return objects.reduce((p, c) => {
+      p[method](c);
+      return c;
+    });
+  }
+
+  function connect(...things) {
+    return _connect(things, 'connect');
+  }
+
+  function disconnect(...things) {
+    return _connect(things, 'disconnect');
+  }
+
+  function range(length, initializer = (v, k) => k) {
+    return Array.from({ length }, initializer);
+  }
+
+  function concatFloat32Array(a, b) {
+    let alen = a.length;
+    let blen = b.length;
+    let result = new Float32Array(alen + blen);
+    result.set(a);
+    result.set(b, alen);
+    return result;
+  }
+
+  function make_recorder(ctx, stream) {
+    const input = ctx.createMediaStreamSource(stream),
+          BUFFER_LEN = 512,
+          CHANNELS = input.channelCount,
+          recorder = ctx.createScriptProcessor(BUFFER_LEN, CHANNELS, CHANNELS),
+          nodes = [input, recorder, ctx.destination];
+
+    return { CHANNELS, recorder, nodes };
+  }
+
+  function recordStream(ctx, stream) {
+    // Recording raw using a ScriptProcessor just doesn't work (TM). We get zeros
+    // at the beginning of each recording, and if we get a stop signal, we need
+    // to process another X chunks b/c otherwise we just cut off.
+    // Generally speaking the recording frame/session is shifted by X samples;
+    // probably the 'latency' of course, but there's no API AFAIK to ask for the
+    // current latency.
+    // I get the same buggy behavior with the 'official' demo:
+    // https://webaudiodemos.appspot.com/AudioRecorder/index.html
+    // https://github.com/GoogleChrome/voice-memos by @paullewis isn't better as
+    // well
+
+    const { CHANNELS, recorder, nodes } = make_recorder(ctx, stream);
+    // Number of buffers we record after stop has been called,
+    // otherwise the samples are cut off at the end :-(
+    const HANGOVER = 20;
+    let stop_called = 0;
+
+    const stop_promise = new Promise(resolve => {
+
+      const recording = range(CHANNELS, () => new Float32Array());
+      recorder.onaudioprocess = e => {
+        // NOTE: this inputBuffer is mutated state (WTF?), so we need to make
+        // a copy, regardless of what we do. Here we flatten the chunks
+        // immediately.
+        const inputBuffer = e.inputBuffer;
+        for (let i = 0; i < CHANNELS; i++) {
+          recording[i] = concatFloat32Array(recording[i], inputBuffer.getChannelData(i));
+        }
+
+        if (stop_called === HANGOVER) {
+          disconnect(...nodes);
+          // We just drop the Zeros from the beginning of the recording (see
+          // comment above)
+          resolve(recording.map(dropUntil(Boolean)));
+        } else if (stop_called > 0) {
+          stop_called += 1;
+        }
+      };
+    });
+
+    connect(...nodes);
+
+    return {
+      stop() {
+        stop_called += 1;
+        return stop_promise;
+      }
+    };
+  }
+
+  var _dec;
+  var _dec2;
+  var _dec3;
+  var _dec4;
+  var _obj;
+  var _init;
+  var _init2;
+  var _init3;
+  var _init4;
+  var _init5;
+  var _init6;
+  function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+    var desc = {};
+    Object['ke' + 'ys'](descriptor).forEach(function (key) {
+      desc[key] = descriptor[key];
+    });
+    desc.enumerable = !!desc.enumerable;
+    desc.configurable = !!desc.configurable;
+
+    if ('value' in desc || desc.initializer) {
+      desc.writable = true;
+    }
+
+    desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+      return decorator(target, property, desc) || desc;
+    }, desc);
+
+    if (context && desc.initializer !== void 0) {
+      desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+      desc.initializer = undefined;
+    }
+
+    if (desc.initializer === void 0) {
+      Object['define' + 'Property'](target, property, desc);
+      desc = null;
+    }
+
+    return desc;
+  }
+
+  Polymer((_dec = Pony_decorators.property({ notify: Pony_decorators.notify, readOnly: Pony_decorators.readOnly }), _dec2 = Pony_decorators.computed('(ctx, stream, recording)'), _dec3 = Pony_decorators.ensureAll(Boolean, { otherwise: null }), _dec4 = Pony_decorators.observer('__recorder'), (_obj = {
+    is: 'record-media',
+
+    ctx: () => new AudioContext(),
+
+    stream: Object,
+
+    recording: Boolean,
+
+    data: Object,
+
+    __recorder: (ctx, stream, _recording) => recordStream(ctx, stream),
+
+    _startStopRecording(current, previous) {
+      if (previous) {
+        previous.stop().then(data => this._setData(data));
+      }
+    }
+
+  }, (_applyDecoratedDescriptor(_obj, 'is', [Pony_decorators.nonVisual], (_init = Object.getOwnPropertyDescriptor(_obj, 'is'), _init = _init ? _init.value : undefined, {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    initializer: function () {
+      return _init;
+    }
+  }), _obj), _applyDecoratedDescriptor(_obj, 'ctx', [Pony_decorators.property], (_init2 = Object.getOwnPropertyDescriptor(_obj, 'ctx'), _init2 = _init2 ? _init2.value : undefined, {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    initializer: function () {
+      return _init2;
+    }
+  }), _obj), _applyDecoratedDescriptor(_obj, 'stream', [Pony_decorators.property], (_init3 = Object.getOwnPropertyDescriptor(_obj, 'stream'), _init3 = _init3 ? _init3.value : undefined, {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    initializer: function () {
+      return _init3;
+    }
+  }), _obj), _applyDecoratedDescriptor(_obj, 'recording', [Pony_decorators.attribute], (_init4 = Object.getOwnPropertyDescriptor(_obj, 'recording'), _init4 = _init4 ? _init4.value : undefined, {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    initializer: function () {
+      return _init4;
+    }
+  }), _obj), _applyDecoratedDescriptor(_obj, 'data', [_dec], (_init5 = Object.getOwnPropertyDescriptor(_obj, 'data'), _init5 = _init5 ? _init5.value : undefined, {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    initializer: function () {
+      return _init5;
+    }
+  }), _obj), _applyDecoratedDescriptor(_obj, '__recorder', [_dec2, _dec3], (_init6 = Object.getOwnPropertyDescriptor(_obj, '__recorder'), _init6 = _init6 ? _init6.value : undefined, {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    initializer: function () {
+      return _init6;
+    }
+  }), _obj), _applyDecoratedDescriptor(_obj, '_startStopRecording', [_dec4], Object.getOwnPropertyDescriptor(_obj, '_startStopRecording'), _obj)), _obj)));
+
+}(Pony.decorators));</script>

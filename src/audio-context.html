@@ -1,0 +1,35 @@
+<!--
+@license
+Copyright (c) 2016 herr.kaste <herr.kaste@gmail.com>. All rights reserved.
+This code may only be used under the BSD style license.
+-->
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../Pony/Pony.decorators.html">
+
+
+<script>
+  import {attribute, property, computed, observer,
+          notify, readOnly,
+          ensureAll, nonVisual} from 'Pony.decorators'
+
+  Polymer({
+    @nonVisual
+    is: 'audio-context',
+
+    @attribute
+    open: true,
+
+
+    @computed('(open)', {notify})
+    @ensureAll(Boolean, {otherwise: null})
+    ctx: () => new AudioContext,
+
+
+    @observer('ctx')
+    _closeOldContext(current, previous) {
+      if (previous) previous.close()
+    }
+
+  })
+
+</script>

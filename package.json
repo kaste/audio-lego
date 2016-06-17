@@ -1,13 +1,12 @@
 {
-  "name": "audio-record-button",
-  "version": "1.0.0",
-  "description": "TBD",
+  "name": "audio-lego",
+  "description": "Record your mic, and play back the sample.",
   "main": "index.html",
   "scripts": {
     "test": "wct",
     "start": "gulp"
   },
-  "author": "",
+  "author": "herr kaste <herr.kaste@gmail.com>",
   "license": "BSD",
   "devDependencies": {
     "babel-eslint": "^6.0.4",

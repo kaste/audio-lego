@@ -1,0 +1,49 @@
+<!--
+@license
+Copyright (c) 2016 herr.kaste <herr.kaste@gmail.com>. All rights reserved.
+This code may only be used under the BSD style license.
+-->
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../Pony/Pony.decorators.html">
+
+
+<script>
+  import {recordStream} from './AudioLegoLib'
+
+  import {attribute, property, computed, observer,
+          notify, readOnly,
+          ensureAll, nonVisual} from 'Pony.decorators'
+
+  Polymer({
+    @nonVisual
+    is: 'record-media',
+
+    @property
+    ctx: () => new AudioContext(),
+
+    @property
+    stream: Object,
+
+    @attribute
+    recording: Boolean,
+
+    @property({notify, readOnly})
+    data: Object,
+
+
+    @computed('(ctx, stream, recording)')
+    @ensureAll(Boolean, {otherwise: null})
+    __recorder:
+      (ctx, stream, _recording) => recordStream(ctx, stream),
+
+
+    @observer('__recorder')
+    _startStopRecording(current, previous) {
+      if (previous) {
+        previous.stop().then(data => this._setData(data))
+      }
+    }
+
+  })
+
+</script>

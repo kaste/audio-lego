@@ -2,38 +2,90 @@
 <html>
 <head>
   <title>audio-record-button - Demo</title>
-  <link rel="import" href="build/audio-record-button.html">
-  <link rel="import" href="build/audio-play-button.html">
+
+  <link rel="import" href="../page-visibility/page-visibility.html">
+  <link rel="import" href="../papr-toggle-button/papr-toggle-button.html">
+  <link rel="import" href="../iron-icons/av-icons.html">
+
+  <link rel="import" href="build/audio-context.html">
+  <link rel="import" href="build/user-media.html">
+  <link rel="import" href="build/record-media.html">
+  <link rel="import" href="build/play-sample.html">
+  <link rel="import" href="build/draw-waveform.html">
+
   <style>
     body {
       font-family: 'Verdana';
       font-size: 16px;
-    }
-
-    audio-record-button {
     }
   </style>
 </head>
 <body>
 
   <template id="demo" is="dom-bind">
-    <audio-record-button
-      data="{{data}}"
-    ></audio-record-button>
+    <page-visibility
+        visible="{{active}}"
+        ></page-visibility>
 
-    <audio-play-button
-      data="[[data]]"
-    ></audio-play-button>
+    <audio-context
+        open="[[active]]"
+        ctx="{{recordingContext}}"
+        ></audio-context>
 
-    <!-- <audio controls src="[[blobUrl]]"></audio> -->
+    <audio-context
+        open="[[active]]"
+        ctx="{{playingContext}}"
+        ></audio-context>
+
+
+    <papr-toggle-button
+        active="{{recording}}"
+        icon="av:mic"
+        ></papr-toggle-button>
+
+    <user-media
+        open="[[active]]"
+        audio
+        stream="{{stream}}"
+        ></user-media>
+
+    <record-media
+        ctx="[[recordingContext]]"
+        recording="[[recording]]"
+        stream="[[stream]]"
+        data="{{data}}"
+        ></record-media>
+
+
+    <papr-toggle-button
+        active="{{playing}}"
+        icon="av:play-arrow"
+        disabled$="[[!data]]"
+        ></papr-toggle-button>
+
+    <play-sample
+        ctx="[[playingContext]]"
+        data="[[data]]"
+        play="{{playing}}"
+        ></play-sample>
+
+    <draw-waveform
+        data="[[data.0]]"
+        ></draw-waveform>
+
+    <store-sample data="[[data]]" blob="{{blob}}"></store-sample>
+<!--
+    <slice-sample in-data="[[data]]" out="{{sample}}" start="123" end="345"></slice-sample>
+    <draw-waveform data="[[sample]]"></draw-waveform>
+ -->
   </template>
 
   <script>
-    const demo = document.querySelector('#demo');
+    const demo = document.querySelector('#demo')
 
     demo.addEventListener('dom-change', () => {
-      console.log('dom-change');
-    });
+      console.log('dom-change')
+    })
   </script>
 </body>
 </html>

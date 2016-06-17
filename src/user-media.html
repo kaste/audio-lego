@@ -1,0 +1,72 @@
+<!--
+@license
+Copyright (c) 2016 herr.kaste <herr.kaste@gmail.com>. All rights reserved.
+This code may only be used under the BSD style license.
+-->
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../Pony/Pony.decorators.html">
+
+<script>
+  import {openStream, closeStream} from './AudioLegoLib'
+
+  import {attribute, property, asyncObserver, FX,
+          notify, readOnly} from 'Pony.decorators'
+
+  Polymer({
+    is: 'user-media',
+
+    @attribute
+    open: Boolean,
+
+    @attribute
+    audio: false,
+
+    @attribute
+    video: false,
+
+    @property({readOnly, notify})
+    stream: Object,
+
+    @property({readOnly, notify})
+    error: Object,
+
+
+
+    @asyncObserver('(open, audio, video)')
+    @FX('open')
+    _openChanged(open, audio, video) {
+      if (open) {
+        this.openStream({audio, video})
+      } else {
+        this.closeStream()
+      }
+    },
+
+    openStream(options={video: this.video || false,
+                        audio: this.audio || false}) {
+      if (this.stream) this.closeStream()
+
+      let then = Date.now()
+      return openStream(options).then(stream => {
+        this.guard('open', _ => this.open = true)
+        this._setStream(stream)
+      }).catch(error => {
+        let now = Date.now()
+        if (now - then < 1000) {
+          this.fire('auto-denied')
+        }
+        this._setError(error)
+        this.guard('open', _ => this.open = false)
+      })
+    },
+
+    closeStream(stream=this.stream) {
+      if (stream) closeStream(stream)
+      this._setStream(null)
+      this.guard('open', _ => this.open = false)
+    }
+
+
+  })
+
+</script>

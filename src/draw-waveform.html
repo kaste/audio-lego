@@ -1,0 +1,75 @@
+<!--
+@license
+Copyright (c) 2016 herr.kaste <herr.kaste@gmail.com>. All rights reserved.
+This code may only be used under the BSD style license.
+-->
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../Pony/Pony.decorators.html">
+
+
+
+<dom-module id="draw-waveform">
+  <style>
+    :host {
+      display: inline-block;
+      background: #fdfdfd;
+      /* width: 95%; */
+      /* height: 45%; */
+      border: 1px solid #e8e7e7;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+  <template>
+    <canvas id="canvas" width="1024" height="512"></canvas>
+  </template>
+</dom-module>
+<script>
+
+  import {pipe, map, splitIntoN, maxMinPairs} from './AudioLegoLib/funcs'
+
+  import {attribute, property, computed, observer,
+          notify, readOnly,
+          ensureAll, nonVisual} from 'Pony.decorators'
+
+
+
+  Polymer({
+    is: 'draw-waveform',
+
+    @property
+    data: Array,
+
+    @property
+    width: 1024,
+
+
+    @computed('(width, data)')
+    @ensureAll
+    __reducedData: pipe(splitIntoN, map(maxMinPairs)),
+
+
+    @observer('__reducedData')
+    draw(data) {
+      const
+        canvas = this.$.canvas,
+        width = canvas.width,
+        height = canvas.height,
+        context = canvas.getContext('2d'),
+        amp = height / 2
+
+      context.fillStyle = "#2d2d2d"
+      context.clearRect(0, 0, width, height)
+
+      data.map(([max, min], i) => {
+        // if (i > 256) context.fillStyle = "green"
+        context.fillRect(i, (1+min) * amp,
+                         1, Math.max((max-min) * amp))
+      })
+    }
+
+  })
+
+</script>

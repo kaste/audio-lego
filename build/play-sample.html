@@ -1,0 +1,170 @@
+<!--
+@license
+Copyright (c) 2016 herr.kaste <herr.kaste@gmail.com>. All rights reserved.
+This code may only be used under the BSD style license.
+-->
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../Pony/Pony.decorators.html">
+
+
+<script>(function (Pony_decorators) {
+    'use strict';
+
+    // min :: [Number a] -> a
+    const min = Function.prototype.apply.bind(Math.min, null);
+    // max :: [Number a] -> a
+    const max = Function.prototype.apply.bind(Math.max, null);
+
+    const getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia).bind(navigator);
+
+    function _connect(objects, method) {
+      return objects.reduce((p, c) => {
+        p[method](c);
+        return c;
+      });
+    }
+
+    function connect(...things) {
+      return _connect(things, 'connect');
+    }
+
+    function AudioBufferFromArrayBuffer(ctx, ary) {
+      const CHANNELS = ary.length;
+      const LENGTH = ary[0].length;
+      const buffer = ctx.createBuffer(CHANNELS, LENGTH, ctx.sampleRate);
+      for (let i = 0; i < CHANNELS; i++) {
+        buffer.getChannelData(i).set(ary[i]);
+
+        // should be?
+        // buffer.copyToChannel(ary[i], i)
+      }
+      return buffer;
+    }
+
+    function createBufferSource(ctx, buffer) {
+      const bufferSource = ctx.createBufferSource();
+      bufferSource.buffer = buffer;
+      return bufferSource;
+    }
+
+    function sample_player(ctx, buffer) {
+      const sampler = createBufferSource(ctx, buffer);
+      connect(sampler, ctx.destination);
+
+      return {
+        start(time = 0) {
+          sampler.start(time);
+          return new Promise(resolve => {
+            sampler.addEventListener('ended', resolve);
+          });
+        },
+        stop() {
+          sampler.stop();
+        }
+      };
+    }
+
+    var _dec;
+    var _dec2;
+    var _dec3;
+    var _dec4;
+    var _dec5;
+    var _obj;
+    var _init;
+    var _init2;
+    var _init3;
+    var _init4;
+    var _init5;
+    var _init6;
+    function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+        var desc = {};
+        Object['ke' + 'ys'](descriptor).forEach(function (key) {
+            desc[key] = descriptor[key];
+        });
+        desc.enumerable = !!desc.enumerable;
+        desc.configurable = !!desc.configurable;
+
+        if ('value' in desc || desc.initializer) {
+            desc.writable = true;
+        }
+
+        desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+            return decorator(target, property, desc) || desc;
+        }, desc);
+
+        if (context && desc.initializer !== void 0) {
+            desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+            desc.initializer = undefined;
+        }
+
+        if (desc.initializer === void 0) {
+            Object['define' + 'Property'](target, property, desc);
+            desc = null;
+        }
+
+        return desc;
+    }
+
+    Polymer((_dec = Pony_decorators.computed('(ctx, data)'), _dec2 = Pony_decorators.ensureAll(Boolean, { otherwise: null }), _dec3 = Pony_decorators.computed('(ctx, __sample, play)'), _dec4 = Pony_decorators.ensureAll(Boolean, { otherwise: null }), _dec5 = Pony_decorators.observer('__player'), (_obj = {
+        is: 'play-sample',
+
+        ctx: () => new AudioContext(),
+
+        data: Array,
+        play: Boolean,
+
+        __sample: AudioBufferFromArrayBuffer,
+
+        __player: (ctx, sample, _play) => sample_player(ctx, sample),
+
+        _onSamplerChanged(current, previous) {
+            if (previous) previous.stop();
+
+            if (current) current.start().then(() => this.play = false);
+        }
+
+    }, (_applyDecoratedDescriptor(_obj, 'is', [Pony_decorators.nonVisual], (_init = Object.getOwnPropertyDescriptor(_obj, 'is'), _init = _init ? _init.value : undefined, {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        initializer: function () {
+            return _init;
+        }
+    }), _obj), _applyDecoratedDescriptor(_obj, 'ctx', [Pony_decorators.property], (_init2 = Object.getOwnPropertyDescriptor(_obj, 'ctx'), _init2 = _init2 ? _init2.value : undefined, {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        initializer: function () {
+            return _init2;
+        }
+    }), _obj), _applyDecoratedDescriptor(_obj, 'data', [Pony_decorators.property], (_init3 = Object.getOwnPropertyDescriptor(_obj, 'data'), _init3 = _init3 ? _init3.value : undefined, {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        initializer: function () {
+            return _init3;
+        }
+    }), _obj), _applyDecoratedDescriptor(_obj, 'play', [Pony_decorators.attribute], (_init4 = Object.getOwnPropertyDescriptor(_obj, 'play'), _init4 = _init4 ? _init4.value : undefined, {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        initializer: function () {
+            return _init4;
+        }
+    }), _obj), _applyDecoratedDescriptor(_obj, '__sample', [_dec, _dec2], (_init5 = Object.getOwnPropertyDescriptor(_obj, '__sample'), _init5 = _init5 ? _init5.value : undefined, {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        initializer: function () {
+            return _init5;
+        }
+    }), _obj), _applyDecoratedDescriptor(_obj, '__player', [_dec3, _dec4], (_init6 = Object.getOwnPropertyDescriptor(_obj, '__player'), _init6 = _init6 ? _init6.value : undefined, {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        initializer: function () {
+            return _init6;
+        }
+    }), _obj), _applyDecoratedDescriptor(_obj, '_onSamplerChanged', [_dec5], Object.getOwnPropertyDescriptor(_obj, '_onSamplerChanged'), _obj)), _obj)));
+
+}(Pony.decorators));</script>

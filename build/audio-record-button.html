@@ -1,0 +1,133 @@
+<!--
+@license
+Copyright (c) 2016 herr.kaste <herr.kaste@gmail.com>. All rights reserved.
+This code may only be used under the BSD style license.
+-->
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../iron-icons/av-icons.html">
+<link rel="import" href="../../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="toggle-button.html">
+
+<dom-module id="audio-record-button">
+  <template>
+    <style>
+      :host {
+        /*display: block;*/
+      }
+
+      toggle-button {
+        border-radius: 50%;
+        transition: all .1s;
+
+        @apply(--audio-record-button);
+      }
+      toggle-button[active] {
+        color: var(--audio-record-button-active-color, white);
+        background: var(--audio-record-button-active-backgound, red);
+      }
+    </style>
+
+    <toggle-button id="button" noink="" active="{{active}}" icon="[[_computeIcon(active)]]"></toggle-button>
+
+  </template>
+  <script>(function () {
+  'use strict';
+
+  /* globals MediaRecorder */
+
+  navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia;
+
+  Polymer({
+    is: 'audio-record-button',
+    properties: {
+      recording: {
+        type: Boolean,
+        readOnly: true,
+        value: false,
+        notify: true
+      },
+      data: {
+        type: Object,
+        notify: true
+      }
+    },
+
+    observers: ['_toggleRecording(active)', '_startStopRecording(recording)'],
+
+    _toggleRecording(active) {
+      this._setRecording(active);
+    },
+
+    _startStopRecording(recording) {
+      if (!recording) {
+        if (this.recorder) {
+          this.recorder.stop();
+        }
+        return;
+      }
+
+      const config = {
+        video: false,
+        audio: true
+      };
+
+      const recordedData = [];
+      // const audioContext = new AudioContext();
+      const onStreamSuccess = stream => {
+        // const sourceNode = audioContext.createMediaStreamSource(stream);
+        const recorder = new MediaRecorder(stream, {
+          mimeType: 'audio/webm'
+        });
+        recorder.addEventListener('error', evt => {
+          console.log(`we had an error ${ evt }`);
+        });
+
+        recorder.addEventListener('dataavailable', evt => {
+          if (!evt.data || evt.data.size === 0) {
+            return;
+          }
+
+          recordedData.push(evt.data);
+        });
+
+        recorder.addEventListener('stop', _ => {
+          for (let track of stream.getTracks()) {
+            track.stop();
+          }
+
+          const audioBlob = new Blob(recordedData, {
+            type: 'audio/webm'
+          });
+
+          this.data = audioBlob;
+          this.fire('new-recording', { data: audioBlob });
+        });
+
+        recorder.start(10);
+
+        this.recorder = recorder;
+      };
+      const onError = evt => {
+        if (evt.name === 'PermissionDeniedError') {
+          console.log('Permission denied');
+          return;
+        }
+        console.log(`We had an error: ${ evt }`);
+      };
+      navigator.getUserMedia(config, onStreamSuccess, onError);
+    },
+
+    _computeIcon(active) {
+      return active ? 'av:mic' : 'av:mic-none';
+    },
+
+    created() {},
+
+    ready() {},
+
+    attached() {}
+
+  });
+
+}());</script>
+</dom-module>

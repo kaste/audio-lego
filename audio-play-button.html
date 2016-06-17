@@ -1,0 +1,129 @@
+<!--
+@license
+Copyright (c) 2016 herr.kaste <herr.kaste@gmail.com>. All rights reserved.
+This code may only be used under the BSD style license.
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-icons/av-icons.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="toggle-button.html">
+
+<dom-module id="audio-play-button">
+  <template>
+    <style>
+      :host {
+        /*display: block;*/
+      }
+
+      paper-icon-button {
+        border-radius: 50%;
+        transition: all .1s;
+        color: green;
+      }
+      paper-icon-button[active] {
+        color: green;
+      }
+    </style>
+
+    <paper-icon-button id="button" toggles
+        active="{{active}}"
+        icon="[[_computeIcon(active)]]"
+        disabled="[[disabled]]"
+    ></paper-icon-button>
+
+    <audio id="audio"
+        src="[[_blobUrl]]"
+        on-ended="_onAudioEnded"
+    ></audio>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'audio-play-button',
+      properties: {
+        playing: {
+          type: Boolean,
+          readOnly: true,
+          value: false,
+          notify: true
+        },
+
+        data: {
+          type: Object
+        },
+
+        disabled: {
+          type: Boolean,
+          value: true,
+          reflectToAttribute: true,
+          computed: '_computeDisabled(data)'
+        },
+
+        _blobUrl: {
+          type: String,
+          computed: '_computeBlobUrl(data)',
+          observer: '_blobUrlChanged'
+        }
+      },
+
+      observers: [
+        '_togglePlaying(active)',
+        '_activeChanged(active)'
+      ],
+
+      _togglePlaying(active) {
+        this._setPlaying(active);
+      },
+
+      _activeChanged(active) {
+        if (active) {
+          this.play();
+        } else {
+          this.stop();
+        }
+      },
+
+      play() {
+        this.$.audio.play();
+      },
+
+      stop() {
+        this.$.audio.pause();
+        this.$.audio.currentTime = 0;
+      },
+
+      _onAudioEnded() {
+        this.active = false;
+      },
+
+      _blobUrlChanged(_, old) {
+        if (old) {
+          URL.revokeObjectURL(old);
+        }
+      },
+
+      _computeBlobUrl(data) {
+        return data ? URL.createObjectURL(data) : '';
+      },
+
+      _computeDisabled(data) {
+        return !data;
+      },
+
+      _computeIcon(active) {
+        return active ? 'av:play-circle-filled' : 'av:play-arrow';
+      },
+
+      created() {
+      },
+
+      ready() {
+
+      },
+
+      attached() {
+      }
+
+    });
+  </script>
+</dom-module>

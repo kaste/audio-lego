@@ -1,0 +1,22 @@
+{
+  "name": "audio-record-button",
+  "version": "1.0.0",
+  "description": "TBD",
+  "main": "index.html",
+  "scripts": {
+    "test": "wct",
+    "serve": "polyserve",
+    "watch": "browser-sync start --proxy localhost:8080 --files . --startPath /components/audio-record-button/",
+    "start": "polyserve & browser-sync start --proxy localhost:8080 --files . --startPath /components/audio-record-button/"
+  },
+  "author": "",
+  "license": "BSD",
+  "devDependencies": {
+    "babel-eslint": "^6.0.4",
+    "browser-sync": "^2.12.10",
+    "eslint": "^2.11.1",
+    "eslint-plugin-html": "^1.5.1",
+    "polyserve": "^0.12.0",
+    "web-component-tester": "^4.2.2"
+  }
+}

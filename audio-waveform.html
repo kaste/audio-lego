@@ -1,0 +1,113 @@
+<!--
+@license
+Copyright (c) 2016 herr.kaste <herr.kaste@gmail.com>. All rights reserved.
+This code may only be used under the BSD style license.
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-icons/av-icons.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="toggle-button.html">
+
+<dom-module id="audio-play-button">
+  <template>
+    <style>
+      :host {
+        /*display: block;*/
+      }
+
+      paper-icon-button {
+        border-radius: 50%;
+        transition: all .1s;
+        color: green;
+      }
+      paper-icon-button[active] {
+        color: green;
+      }
+    </style>
+
+    <canvas id="canvas"></canvas>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'audio-play-button',
+      properties: {
+        data: {
+          type: Object
+        }
+      },
+
+      observers: [
+      ],
+
+
+      created() {
+      },
+
+      ready() {
+        this.__ctx = this.$.canvas.getContext('2d');
+        this.configureWaveCanvas();
+      },
+
+      configureWaveCanvas () {
+        const $this = Polymer.dom(this);
+        const canvas = this.$.canvas;
+        const dPR = window.devicePixelRatio || 1;
+
+        this.waveWidth = $this.offsetWidth;
+        this.waveHeight = $this.offsetHeight;
+
+        // Scale the backing store by the dPR.
+        canvas.width = this.waveWidth * dPR;
+        canvas.height = this.waveHeight * dPR;
+
+        // Scale it back down to the width and height we want in logical pixels.
+        canvas.style.width = this.waveWidth + 'px';
+        canvas.style.height = this.waveHeight + 'px';
+
+        // Account for any upscaling by applying a single scale transform.
+        this.__ctx.scale(dPR, dPR);
+      },
+
+      renderWaveCanvas() {
+
+        if (!this.volumeData)
+          return;
+
+        this.waveCanvas.classList.add('details-view__wave--visible');
+
+        var padding = 50;
+        var maxHeight = this.waveHeight - (2 * padding);
+
+        this.waveCtx.clearRect(0, 0, this.waveWidth, this.waveHeight);
+        this.waveCtx.save();
+        this.waveCtx.translate(0, this.waveHeight * 0.5);
+        this.waveCtx.beginPath();
+        this.waveCtx.globalAlpha = 0.2;
+
+        for (var d = 0; d < this.volumeData.length; d++) {
+          var x = (d / this.volumeData.length) * this.waveWidth;
+          var h = this.volumeData[d] * maxHeight * 0.5;
+          h = Math.max(1, h);
+          this.waveCtx.lineTo(x, -h);
+        }
+
+        for (d = this.volumeData.length - 1; d >= 0; d--) {
+          var x = (d / this.volumeData.length) * this.waveWidth;
+          var h = this.volumeData[d] * maxHeight * 0.5;
+          h = Math.max(1, h);
+          this.waveCtx.lineTo(x, h);
+        }
+
+        this.waveCtx.closePath();
+        this.waveCtx.fill();
+        this.waveCtx.restore();
+      },
+
+
+      attached() {
+      }
+
+    });
+  </script>
+</dom-module>

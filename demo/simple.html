@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>audio-record-button - Demo</title>
+  <link rel="import" href="../build/audio-record-button.html">
+  <link rel="import" href="../build/audio-play-button.html">
+  <style>
+    body {
+      font-family: 'Verdana';
+      font-size: 16px;
+    }
+
+    audio-record-button {
+    }
+  </style>
+</head>
+<body>
+
+  <template id="demo" is="dom-bind">
+    <audio-record-button
+      data="{{data}}"
+    ></audio-record-button>
+
+    <audio-play-button
+      data="[[data]]"
+    ></audio-play-button>
+
+    <!-- <audio controls src="[[blobUrl]]"></audio> -->
+  </template>
+
+  <script>
+    const demo = document.querySelector('#demo');
+
+    demo.addEventListener('dom-change', () => {
+      console.log('dom-change');
+    });
+  </script>
+</body>
+</html>

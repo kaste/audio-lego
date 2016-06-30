@@ -5,18 +5,25 @@
   "main": "index.html",
   "scripts": {
     "test": "wct",
-    "serve": "polyserve",
-    "watch": "browser-sync start --proxy localhost:8080 --files . --startPath /components/audio-record-button/",
-    "start": "polyserve & browser-sync start --proxy localhost:8080 --files . --startPath /components/audio-record-button/"
+    "start": "gulp"
   },
   "author": "",
   "license": "BSD",
   "devDependencies": {
     "babel-eslint": "^6.0.4",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-preset-es2015-rollup": "^1.1.1",
     "browser-sync": "^2.12.10",
     "eslint": "^2.11.1",
     "eslint-plugin-html": "^1.5.1",
-    "polyserve": "^0.12.0",
+    "gulp": "^3.9.1",
+    "gulp-cached": "^1.1.0",
+    "gulp-cli": "^1.2.1",
+    "gulp-plumber": "^1.1.0",
+    "gulp-process-inline": "^0.1.4",
+    "gulp-rename": "^1.2.2",
+    "gulp-rollup-file": "^0.1.3",
+    "rollup-plugin-babel": "^2.6.1",
     "web-component-tester": "^4.2.2"
   }
 }

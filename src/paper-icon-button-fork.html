@@ -8,10 +8,10 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../iron-icon/iron-icon.html">
-<link rel="import" href="../paper-behaviors/paper-inky-focus-behavior.html">
-<link rel="import" href="../paper-styles/default-theme.html">
+<link rel="import" href="../../polymer/polymer.html">
+<link rel="import" href="../../iron-icon/iron-icon.html">
+<link rel="import" href="../../paper-behaviors/paper-inky-focus-behavior.html">
+<link rel="import" href="../../paper-styles/default-theme.html">
 
 <!--
 Fork of the paper-icon-button to make the `pressed` property notifying.
@@ -22,7 +22,7 @@ property originally comes from the IronButtonState Behavior, but unfortunately
 is not notifying.
 -->
 
-<dom-module id="toggle-button">
+<dom-module id="paper-icon-button-fork">
   <template strip-whitespace>
     <style>
       :host {
@@ -76,12 +76,11 @@ is not notifying.
 
   <script>
     Polymer({
-      is: 'toggle-button',
+      is: 'paper-icon-button-fork',
 
       hostAttributes: {
         role: 'button',
-        tabindex: '0',
-        toggles: true
+        tabindex: '0'
       },
 
       behaviors: [
@@ -112,18 +111,25 @@ is not notifying.
         alt: {
           type: String,
           observer: "_altChanged"
+        },
+
+        /**
+         * If true, the user is currently holding down the button.
+         *
+         * Copied from IronButtonState
+         */
+        pressed: {
+          type: Boolean,
+          readOnly: true,
+          value: false,
+          reflectToAttribute: true,
+          notify: true  // <-------- the essential line
+
+          // It is important to not redefine any observer b/c it would be
+          // called twice and thrice then.
+          // observer: '_pressedChanged'
         }
 
-      },
-
-      observers: [
-        '_toggleActiveOnPress(pressed)'
-      ],
-
-      _toggleActiveOnPress(pressed) {
-        if (pressed) {
-          this.click();
-        }
       },
 
       _altChanged: function(newValue, oldValue) {
